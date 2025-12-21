@@ -8,6 +8,7 @@ import '../../core/theme/app_colors.dart';
 import '../../repositories/auth_repository.dart';
 import '../widgets/app_back_button.dart';
 import '../widgets/app_button.dart';
+import '../widgets/auth_wrapper.dart';
 import 'profile_setup_screen.dart';
 
 class OtpScreen extends StatefulWidget {
@@ -54,10 +55,13 @@ class _OtpScreenState extends State<OtpScreen> {
     setState(() => _isLoading = true);
     try {
       await context.read<AuthRepository>().verifyOtp(widget.phoneNumber, code);
-      // AuthWrapper will handle navigation or we might need to go to ProfileSetup if it's new user
-      // For now, let's assume it goes to profile setup if they don't have a name yet
       if (mounted) {
-        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const ProfileSetupScreen()));
+        final authRepo = context.read<AuthRepository>();
+        if (authRepo.localUser?.name.isNotEmpty == true) {
+          Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => const AuthWrapper()), (route) => false);
+        } else {
+          Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const ProfileSetupScreen()));
+        }
       }
     } catch (e) {
       if (mounted) {

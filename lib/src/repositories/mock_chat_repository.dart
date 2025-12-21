@@ -60,4 +60,25 @@ class MockChatRepository implements ChatRepository {
   Stream<List<Chat>> watchChats() {
     return Stream.value([]);
   }
+
+  @override
+  Future<List<AppUser>> searchUsers(String query) async {
+    return [];
+  }
+
+  @override
+  Future<String> getOrCreateChat(String otherUserId) async {
+    return 'new-chat-id';
+  }
+
+  @override
+  Future<AppUser> getChatParticipant(String chatId) async {
+    return const AppUser(id: 'alex', name: 'Alex Johnson', avatarUrl: '');
+  }
+
+  @override
+  Future<void> setTypingStatus(String chatId, bool isTyping) async {}
+
+  @override
+  Stream<bool> watchTypingStatus(String chatId) => Stream.value(false);
 }

@@ -1,4 +1,3 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
@@ -6,6 +5,7 @@ import 'package:provider/provider.dart';
 import '../../controllers/chat_detail_controller.dart';
 import '../../core/theme/app_colors.dart';
 import '../../repositories/chat_repository.dart';
+import '../widgets/app_avatar.dart';
 import '../widgets/app_back_button.dart';
 import '../widgets/chat_input_bar.dart';
 import '../widgets/message_bubble.dart';
@@ -50,10 +50,13 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
 
                   return ListView.builder(
                     padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 20.h),
-                    itemCount: controller.messages.length + (controller.isTyping ? 1 : 0),
+                    itemCount: controller.messages.length + (controller.isOtherTyping ? 1 : 0),
                     itemBuilder: (context, index) {
                       if (index == controller.messages.length) {
-                        return _buildTypingIndicator(context);
+                        return Padding(
+                          padding: EdgeInsets.only(top: 8.h),
+                          child: _buildTypingIndicator(context),
+                        );
                       }
 
                       if (index == 0) {
@@ -92,44 +95,23 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
       titleSpacing: 0,
       title: Row(
         children: [
-          Stack(
-            children: [
-              Container(
-                width: 40.w,
-                height: 40.w,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(color: Colors.grey[300]!, width: 1.w),
-                ),
-                clipBehavior: Clip.antiAlias,
-                child: CachedNetworkImage(
-                  imageUrl:
-                      'https://lh3.googleusercontent.com/aida-public/AB6AXuAxuCX03acSCsPLxrVxaTWKLwi5Dd8oOhV4y5xtz92VBiHQgzJucyerLgZ-eaYpRF-blo56cWrDBJb6oc_LkPybT4HpV-HJPq_FWMCRNKRpW2HlzxN4kh3w4gZra41Tzk5qonhrMpJ-NHFZIgkGosq77KVfPXh-UKOpLytw2eWgCV_6Y9ZoHaUiXkWATXqwzdoXBkunSpYv7tm6yPy5FJlzXfD-vt0B95Qwugxtdmj7X69uQ2npPKjuvhx9eLDSIMtwOhhwanoRO0Q',
-                  fit: BoxFit.cover,
-                ),
-              ),
-              Positioned(
-                bottom: 0,
-                right: 0,
-                child: Container(
-                  width: 12.w,
-                  height: 12.w,
-                  decoration: BoxDecoration(
-                    color: AppColors.online,
-                    shape: BoxShape.circle,
-                    border: Border.all(color: Theme.of(context).scaffoldBackgroundColor, width: 2.w),
-                  ),
-                ),
-              ),
-            ],
+          Consumer<ChatDetailController>(
+            builder: (context, controller, _) {
+              final recipient = controller.recipient;
+              return AppAvatar(avatarUrl: recipient?.avatarUrl, name: recipient?.name ?? "U", size: 40, showOnlineStatus: true, isOnline: true);
+            },
           ),
           SizedBox(width: 10.w),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                "Alice Johnson",
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold, fontSize: 16.sp),
+              Consumer<ChatDetailController>(
+                builder: (context, controller, _) {
+                  return Text(
+                    controller.recipient?.name ?? "Loading...",
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold, fontSize: 16.sp),
+                  );
+                },
               ),
               Text(
                 "Active now",
@@ -161,16 +143,10 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
       padding: EdgeInsets.only(bottom: 16.h),
       child: Row(
         children: [
-          Container(
-            width: 32.w,
-            height: 32.w,
-            decoration: const BoxDecoration(shape: BoxShape.circle),
-            clipBehavior: Clip.antiAlias,
-            child: CachedNetworkImage(
-              imageUrl:
-                  'https://lh3.googleusercontent.com/aida-public/AB6AXuAxuCX03acSCsPLxrVxaTWKLwi5Dd8oOhV4y5xtz92VBiHQgzJucyerLgZ-eaYpRF-blo56cWrDBJb6oc_LkPybT4HpV-HJPq_FWMCRNKRpW2HlzxN4kh3w4gZra41Tzk5qonhrMpJ-NHFZIgkGosq77KVfPXh-UKOpLytw2eWgCV_6Y9ZoHaUiXkWATXqwzdoXBkunSpYv7tm6yPy5FJlzXfD-vt0B95Qwugxtdmj7X69uQ2npPKjuvhx9eLDSIMtwOhhwanoRO0Q',
-              fit: BoxFit.cover,
-            ),
+          Consumer<ChatDetailController>(
+            builder: (context, controller, _) {
+              return AppAvatar(avatarUrl: controller.recipient?.avatarUrl, name: controller.recipient?.name ?? "U", size: 32);
+            },
           ),
           SizedBox(width: 8.w),
           Container(
@@ -189,9 +165,9 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
               children: [
                 _buildDot(0),
                 SizedBox(width: 4.w),
-                _buildDot(150),
+                _buildDot(1),
                 SizedBox(width: 4.w),
-                _buildDot(300),
+                _buildDot(2),
               ],
             ),
           ),
@@ -200,17 +176,55 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
     );
   }
 
-  Widget _buildDot(int delay) {
-    return TweenAnimationBuilder<double>(
-      tween: Tween(begin: 0, end: 1),
-      duration: const Duration(milliseconds: 600),
-      builder: (context, value, child) {
-        return Container(
+  Widget _buildDot(int index) {
+    return TypingIndicatorDot(index: index);
+  }
+}
+
+class TypingIndicatorDot extends StatefulWidget {
+  final int index;
+  const TypingIndicatorDot({super.key, required this.index});
+
+  @override
+  State<TypingIndicatorDot> createState() => _TypingIndicatorDotState();
+}
+
+class _TypingIndicatorDotState extends State<TypingIndicatorDot> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _animation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 600));
+
+    _animation = Tween<double>(begin: 0.3, end: 1.0).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
+
+    Future.delayed(Duration(milliseconds: widget.index * 200), () {
+      if (mounted) {
+        _controller.repeat(reverse: true);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FadeTransition(
+      opacity: _animation,
+      child: ScaleTransition(
+        scale: _animation,
+        child: Container(
           width: 6.w,
           height: 6.w,
           decoration: const BoxDecoration(color: Colors.grey, shape: BoxShape.circle),
-        );
-      },
+        ),
+      ),
     );
   }
 }

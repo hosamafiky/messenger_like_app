@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../models/chat_model.dart';
 import '../models/story_model.dart';
+import '../models/user_model.dart';
 import '../repositories/chat_repository.dart';
 
 class ChatController extends ChangeNotifier {
@@ -42,6 +43,15 @@ class ChatController extends ChangeNotifier {
 
     _isLoading = false;
     notifyListeners();
+  }
+
+  Future<List<AppUser>> searchUsers(String query) async {
+    if (query.isEmpty) return [];
+    return await repository.searchUsers(query);
+  }
+
+  Future<String> startChat(String otherUserId) async {
+    return await repository.getOrCreateChat(otherUserId);
   }
 
   @override

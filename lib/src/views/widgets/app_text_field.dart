@@ -9,6 +9,7 @@ class AppTextField extends StatelessWidget {
   final VoidCallback? onToggleVisibility;
   final TextInputType? keyboardType;
   final String? prefixText;
+  final IconData? prefixIcon;
   final Widget? suffixIcon;
   final ValueChanged<String>? onChanged;
   final int? maxLength;
@@ -33,6 +34,7 @@ class AppTextField extends StatelessWidget {
     this.onToggleVisibility,
     this.keyboardType,
     this.prefixText,
+    this.prefixIcon,
     this.suffixIcon,
     this.onChanged,
     this.maxLength,
@@ -76,6 +78,7 @@ class AppTextField extends StatelessWidget {
           hintText: hint,
           hintStyle: TextStyle(color: Colors.grey[500]),
           prefixText: prefixText,
+          prefixIcon: prefixIcon != null ? Icon(prefixIcon, color: Colors.grey[500], size: 20.w) : null,
           prefixStyle: textStyle ?? TextStyle(color: isDark ? Colors.white : const Color(0xFF0F172A), fontSize: 16.sp, fontWeight: FontWeight.w500),
           counterText: "",
           border: InputBorder.none,

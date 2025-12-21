@@ -5,9 +5,11 @@ import 'package:provider/provider.dart';
 import '../../controllers/chat_controller.dart';
 import '../../core/theme/app_colors.dart';
 import '../../repositories/auth_repository.dart';
+import '../widgets/app_avatar.dart';
 import '../widgets/app_icon_button.dart';
 import '../widgets/chat_list_item.dart';
 import '../widgets/story_avatar.dart';
+import 'user_search_screen.dart';
 
 class ChatsScreen extends StatefulWidget {
   final ChatController controller;
@@ -35,7 +37,7 @@ class _ChatsScreenState extends State<ChatsScreen> {
       builder: (context, child) {
         return Scaffold(
           body: widget.controller.isLoading
-              ? const Center(child: CircularProgressIndicator())
+              ? const Center(child: CircularProgressIndicator.adaptive())
               : SafeArea(
                   child: Column(
                     children: [
@@ -45,7 +47,7 @@ class _ChatsScreenState extends State<ChatsScreen> {
                           onRefresh: widget.controller.loadData,
                           child: SingleChildScrollView(
                             physics: const AlwaysScrollableScrollPhysics(),
-                            child: Column(children: [_buildStories(context), _buildChatList(context)]),
+                            child: Column(children: [if (widget.controller.stories.isNotEmpty) _buildStories(context), _buildChatList(context)]),
                           ),
                         ),
                       ),
@@ -70,21 +72,7 @@ class _ChatsScreenState extends State<ChatsScreen> {
           // Left: User Profile
           Stack(
             children: [
-              Container(
-                width: 40.w,
-                height: 40.w,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  image: DecorationImage(
-                    image: NetworkImage(
-                      localUser?.avatarUrl ??
-                          "https://lh3.googleusercontent.com/aida-public/AB6AXuD2DnFUqRBuPDmNRnWMsdqBs7auLTV8D8Jg2i0ppK5X54Dt_blCDjQTGGzNU96CQ9zsCYSQd1FjCKiknoZqondG-yt5EB0HdzrC1PHdK51hZ0A1mkUq7zq9YVeWIJsXGgb4wWjGr8a0GxgHF-y0A-19wwwAha9_uOSCtE2812CcdVWqZ_Qlveu11o_e44UMNBLajp358vAch2FfRPzSi33CT2WTUAVYO0A5tcdtR3e1-yI3uFMwDfY7-Cw-oZ4asSjHGIHdO9XTeC0",
-                    ),
-                    fit: BoxFit.cover,
-                  ),
-                  border: Border.all(color: Colors.grey.shade100, width: 2.w),
-                ),
-              ),
+              AppAvatar(avatarUrl: localUser?.avatarUrl, name: localUser?.name ?? "U", size: 40),
               Positioned(
                 top: 0,
                 right: 0,
@@ -112,7 +100,11 @@ class _ChatsScreenState extends State<ChatsScreen> {
             children: [
               const AppIconButton(icon: Icons.search),
               SizedBox(width: 12.w),
-              const AppIconButton(icon: Icons.edit_square, isPrimary: true),
+              AppIconButton(
+                icon: Icons.edit_square,
+                isPrimary: true,
+                onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const UserSearchScreen())),
+              ),
             ],
           ),
         ],

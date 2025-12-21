@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../core/theme/app_colors.dart';
 import '../../models/message_model.dart';
+import 'app_avatar.dart';
 
 class MessageBubble extends StatelessWidget {
   final Message message;
@@ -20,43 +21,20 @@ class MessageBubble extends StatelessWidget {
         mainAxisAlignment: isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          if (!isMe) ...[
-            Container(
-              width: 32.w,
-              height: 32.w,
-              decoration: const BoxDecoration(shape: BoxShape.circle),
-              clipBehavior: Clip.antiAlias,
-              child: CachedNetworkImage(
-                imageUrl: message.sender.avatarUrl,
-                fit: BoxFit.cover,
-                placeholder: (context, url) => Container(color: Colors.grey[200]),
-              ),
-            ),
-            SizedBox(width: 8.w),
-          ],
+          if (!isMe) ...[AppAvatar(avatarUrl: message.sender.avatarUrl, name: message.sender.name, size: 32), SizedBox(width: 8.w)],
           Flexible(
             child: Column(
               crossAxisAlignment: isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
               children: [
                 _buildContent(context),
-                if (isMe && message.id == "5") // Hacky check for the precise mock item "Perfect. See you there!" to add read receipt
-                  Padding(
-                    padding: EdgeInsets.only(top: 2.h),
-                    child: Container(
-                      width: 14.w,
-                      height: 14.w,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(color: Theme.of(context).scaffoldBackgroundColor, width: 2.w),
-                      ),
-                      clipBehavior: Clip.antiAlias,
-                      child: CachedNetworkImage(
-                        imageUrl:
-                            "https://lh3.googleusercontent.com/aida-public/AB6AXuDopTuy_gZBSWiJuZ-RN43dzCYEQQvvSRIGfpTAVjw0bX7VyasavXMnLurnIWG4Zyy1Nn_wMlFSrWTlCPRoYBfWcjTJfcuMzkN7gjVQtIKY6LMLo5tSKYxN4frharDNzkqm6xpiCvAJ34gl4caBrHRk_wz7cuOXXTrLWKUiwP5Holu1qSE9Fc9b7NHGSExZNTTW-afr5zLJFi_uJGYyK4tlEDh-VB4rhSALkgIa_b6fsvPo3A6gS2-Q9eJfu1Aol1DGYnwyPuY3Jfg",
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                  ),
+                AppAvatar(
+                  avatarUrl:
+                      "https://lh3.googleusercontent.com/aida-public/AB6AXuDopTuy_gZBSWiJuZ-RN43dzCYEQQvvSRIGfpTAVjw0bX7VyasavXMnLurnIWG4Zyy1Nn_wMlFSrWTlCPRoYBfWcjTJfcuMzkN7gjVQtIKY6LMLo5tSKYxN4frharDNzkqm6xpiCvAJ34gl4caBrHRk_wz7cuOXXTrLWKUiwP5Holu1qSE9Fc9b7NHGSExZNTTW-afr5zLJFi_uJGYyK4tlEDh-VB4rhSALkgIa_b6fsvPo3A6gS2-Q9eJfu1Aol1DGYnwyPuY3Jfg",
+                  name: "Recipient",
+                  size: 14,
+                  borderColor: Theme.of(context).scaffoldBackgroundColor,
+                  borderWidth: 2,
+                ),
               ],
             ),
           ),

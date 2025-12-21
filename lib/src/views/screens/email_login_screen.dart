@@ -7,6 +7,8 @@ import '../../repositories/auth_repository.dart';
 import '../widgets/app_back_button.dart';
 import '../widgets/app_button.dart';
 import '../widgets/app_text_field.dart';
+import '../widgets/auth_wrapper.dart';
+import 'profile_setup_screen.dart';
 
 class EmailLoginScreen extends StatefulWidget {
   const EmailLoginScreen({super.key});
@@ -40,6 +42,14 @@ class _EmailLoginScreenState extends State<EmailLoginScreen> {
       final authRepo = context.read<AuthRepository>();
       if (_isLogin) {
         await authRepo.loginWithEmail(_emailController.text.trim(), _passwordController.text.trim());
+        if (mounted) {
+          // If login success, check if we have a name in localUser (cached from _fetchAndCacheProfile)
+          if (authRepo.localUser?.name.isNotEmpty == true) {
+            Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => const AuthWrapper()), (route) => false);
+          } else {
+            Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => const ProfileSetupScreen()), (route) => false);
+          }
+        }
       } else {
         await authRepo.signUpWithEmail(_emailController.text.trim(), _passwordController.text.trim());
         if (mounted) {
@@ -49,7 +59,6 @@ class _EmailLoginScreenState extends State<EmailLoginScreen> {
           });
         }
       }
-      // AuthWrapper will handle navigation
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));

@@ -81,7 +81,7 @@ class SupabaseAuthRepository implements AuthRepository {
     final user = currentUser;
     if (user == null) return;
 
-    await _client.from('profiles').upsert({'id': user.id, 'name': name, 'avatar_url': avatarUrl, 'updated_at': DateTime.now().toIso8601String()});
+    await _client.from('profiles').upsert({'id': user.id, 'name': name, 'avatar_url': avatarUrl});
 
     final appUser = AppUser(id: user.id, name: name, avatarUrl: avatarUrl ?? '');
     await _cacheUser(appUser);

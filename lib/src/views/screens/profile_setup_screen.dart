@@ -1,10 +1,12 @@
-import 'package:cached_network_image/cached_network_image.dart';
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/theme/app_colors.dart';
 import '../../repositories/auth_repository.dart';
+import '../widgets/app_avatar.dart';
 import '../widgets/app_button.dart';
 import '../widgets/app_text_field.dart';
 import '../widgets/auth_wrapper.dart';
@@ -41,6 +43,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
         _navigateToChats(context);
       }
     } catch (e) {
+      log(e.toString());
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
       }
@@ -146,22 +149,13 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
       children: [
         Stack(
           children: [
-            Container(
-              width: 128.w,
-              height: 128.w,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: isDark ? Colors.grey[800] : Colors.grey[100],
-                border: Border.all(color: Theme.of(context).scaffoldBackgroundColor, width: 4.w),
-                boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 10.r, offset: Offset(0, 4.h))],
-              ),
-              clipBehavior: Clip.antiAlias,
-              child: CachedNetworkImage(
-                imageUrl:
-                    'https://lh3.googleusercontent.com/aida-public/AB6AXuBF0Jl4D9mE-_su80YBI6lwRKbIapbAxijBYt8cAII-o9cQaYsX3gtfvtbkiA22LuVzw7_jAPDXAbvLDIU_sN-lPERt7SCw1ZaYl8aDm8CXxaBJFyeFwUDu-mbNS12tFujrB4F-oqK9HyyEB9EdRZqc2OR3aKkDN4_edtn7wvXsY2Z6axNTFCndCYHQSMacq2pFkbfTmfQEzJCrWwnpsSPBOc_uIrGmZWwoWqLNMxv4C8Xjya6voPiXW2KxQMsYjpXTfD0dwBNuSus',
-                fit: BoxFit.cover,
-                placeholder: (context, url) => Icon(Icons.person, size: 64.w, color: Colors.grey[400]),
-              ),
+            AppAvatar(
+              avatarUrl:
+                  'https://lh3.googleusercontent.com/aida-public/AB6AXuBF0Jl4D9mE-_su80YBI6lwRKbIapbAxijBYt8cAII-o9cQaYsX3gtfvtbkiA22LuVzw7_jAPDXAbvLDIU_sN-lPERt7SCw1ZaYl8aDm8CXxaBJFyeFwUDu-mbNS12tFujrB4F-oqK9HyyEB9EdRZqc2OR3aKkDN4_edtn7wvXsY2Z6axNTFCndCYHQSMacq2pFkbfTmfQEzJCrWwnpsSPBOc_uIrGmZWwoWqLNMxv4C8Xjya6voPiXW2KxQMsYjpXTfD0dwBNuSus',
+              name: _nameController.text.isEmpty ? "U" : _nameController.text,
+              size: 128,
+              borderWidth: 4,
+              borderColor: Theme.of(context).scaffoldBackgroundColor,
             ),
             Positioned(
               bottom: 0,

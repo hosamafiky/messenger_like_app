@@ -1,9 +1,9 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../core/theme/app_colors.dart';
 import '../../models/story_model.dart';
+import 'app_avatar.dart';
 
 class StoryAvatar extends StatelessWidget {
   final Story story;
@@ -19,26 +19,13 @@ class StoryAvatar extends StatelessWidget {
       children: [
         Stack(
           children: [
-            Container(
-              width: 72.w, // Outer container to handle border spacing
-              height: 72.w,
-              decoration: isMyStory
-                  ? null
-                  : BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(color: story.isViewed ? Colors.transparent : AppColors.primary, width: 2.w),
-                    ),
-              padding: EdgeInsets.all(3.w), // Spacing between border and image
-              child: Container(
-                decoration: const BoxDecoration(shape: BoxShape.circle),
-                clipBehavior: Clip.antiAlias,
-                child: CachedNetworkImage(
-                  imageUrl: story.user.avatarUrl,
-                  fit: BoxFit.cover,
-                  placeholder: (context, url) => Container(color: Colors.grey[200]),
-                  errorWidget: (context, url, error) => Icon(Icons.error, size: 24.w),
-                ),
-              ),
+            AppAvatar(
+              avatarUrl: story.user.avatarUrl,
+              name: story.user.name,
+              size: 72,
+              borderColor: isMyStory ? Colors.transparent : (story.isViewed ? Colors.transparent : AppColors.primary),
+              borderWidth: isMyStory ? 0 : 2,
+              padding: isMyStory ? 0 : 3,
             ),
             // Online indicator or Add button
             if (isMyStory)

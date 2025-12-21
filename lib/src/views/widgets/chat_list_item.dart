@@ -5,6 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../core/theme/app_colors.dart';
 import '../../models/chat_model.dart';
 import '../screens/chat_detail_screen.dart';
+import 'app_avatar.dart';
 
 class ChatListItem extends StatelessWidget {
   final Chat chat;
@@ -23,22 +24,7 @@ class ChatListItem extends StatelessWidget {
         child: Row(
           children: [
             // Avatar
-            Stack(
-              children: [
-                Container(
-                  width: 60.w,
-                  height: 60.w,
-                  decoration: const BoxDecoration(shape: BoxShape.circle),
-                  clipBehavior: Clip.antiAlias,
-                  child: CachedNetworkImage(
-                    imageUrl: chat.sender.avatarUrl,
-                    fit: BoxFit.cover,
-                    placeholder: (context, url) => Container(color: Colors.grey[200]),
-                    errorWidget: (context, url, error) => Icon(Icons.error, size: 24.w),
-                  ),
-                ),
-              ],
-            ),
+            AppAvatar(avatarUrl: chat.sender.avatarUrl, name: chat.sender.name, size: 60),
             SizedBox(width: 16.w),
             // Content
             Expanded(

@@ -1,10 +1,77 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:provider/provider.dart';
 
+import '../../controllers/chat_detail_controller.dart';
 import '../../core/theme/app_colors.dart';
+import '../../models/message_model.dart';
 
-class ChatInputBar extends StatelessWidget {
+class ChatInputBar extends StatefulWidget {
   const ChatInputBar({super.key});
+
+  @override
+  State<ChatInputBar> createState() => _ChatInputBarState();
+}
+
+class _ChatInputBarState extends State<ChatInputBar> {
+  final TextEditingController _textController = TextEditingController();
+  bool _hasText = false;
+  Timer? _typingTimer;
+  bool _isTyping = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _textController.addListener(_onTextChanged);
+  }
+
+  void _onTextChanged() {
+    final hasText = _textController.text.trim().isNotEmpty;
+    if (hasText != _hasText) {
+      setState(() {
+        _hasText = hasText;
+      });
+    }
+
+    if (hasText && !_isTyping) {
+      _isTyping = true;
+      context.read<ChatDetailController>().setMyTypingStatus(true);
+    }
+
+    _typingTimer?.cancel();
+    _typingTimer = Timer(const Duration(seconds: 2), () {
+      if (_isTyping) {
+        _isTyping = false;
+        context.read<ChatDetailController>().setMyTypingStatus(false);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _typingTimer?.cancel();
+    _textController.removeListener(_onTextChanged);
+    _textController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _handleSend() async {
+    final text = _textController.text.trim();
+    if (text.isEmpty) return;
+
+    final controller = context.read<ChatDetailController>();
+    _textController.clear();
+
+    try {
+      await controller.sendMessage(text, MessageContentType.text);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Failed to send message: $e")));
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -17,16 +84,15 @@ class ChatInputBar extends StatelessWidget {
         ),
       ),
       child: SafeArea(
-        // Ensure safe area as well
         top: false,
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
-            _buildActionButton(context, Icons.add_circle, filled: true),
+            _buildActionButton(Icons.add_circle),
             SizedBox(width: 8.w),
-            _buildActionButton(context, Icons.camera_alt, filled: true),
+            _buildActionButton(Icons.camera_alt),
             SizedBox(width: 8.w),
-            _buildActionButton(context, Icons.image, filled: true),
+            _buildActionButton(Icons.image),
             SizedBox(width: 8.w),
             Expanded(
               child: Container(
@@ -34,13 +100,16 @@ class ChatInputBar extends StatelessWidget {
                 padding: EdgeInsets.symmetric(horizontal: 16.w),
                 decoration: BoxDecoration(
                   color: Theme.of(context).cardColor,
-                  borderRadius: BorderRadius.circular(22.r), // rounded-full
+                  borderRadius: BorderRadius.circular(22.r),
                   border: Border.all(color: Theme.of(context).dividerColor),
                 ),
                 child: Row(
                   children: [
                     Expanded(
                       child: TextField(
+                        controller: _textController,
+                        onTapOutside: (_) => FocusScope.of(context).unfocus(),
+                        onSubmitted: (_) => _handleSend(),
                         decoration: InputDecoration(
                           hintText: "Aa",
                           hintStyle: TextStyle(color: Colors.grey[400], fontSize: 16.sp),
@@ -59,24 +128,23 @@ class ChatInputBar extends StatelessWidget {
               ),
             ),
             SizedBox(width: 8.w),
-            _buildActionButton(context, Icons.mic, filled: true),
+            _buildActionButton(_hasText ? Icons.send : Icons.mic, onTap: _hasText ? _handleSend : null),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildActionButton(BuildContext context, IconData icon, {bool filled = false}) {
-    return Container(
-      width: 40.w,
-      height: 40.w,
-      decoration: const BoxDecoration(
-        shape: BoxShape.circle,
-        // color: filled ? Colors.grey[200] : null, // Mockup has transparent bg for icon buttons except mic maybe?
-        // HTML: hover:bg-slate-200. Default transparent. text-primary.
-      ),
-      child: Center(
-        child: Icon(icon, color: AppColors.primary, size: 28.w),
+  Widget _buildActionButton(IconData icon, {VoidCallback? onTap}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 40.w,
+        height: 40.w,
+        decoration: const BoxDecoration(shape: BoxShape.circle),
+        child: Center(
+          child: Icon(icon, color: AppColors.primary, size: 28.w),
+        ),
       ),
     );
   }
