@@ -13,12 +13,18 @@ class ConnectionCheckerModule extends StatefulWidget {
 }
 
 class _ConnectionCheckerModuleState extends State<ConnectionCheckerModule> {
+  /// Listener for app lifecycle events.
   late final AppLifecycleListener _listener;
+
+  /// Initializes the lifecycle listener.
+  void _initializeLifeCycleListener() {
+    _listener = AppLifecycleListener(onResume: _initializeSubsciption, onPause: _subscription.cancel);
+  }
 
   /// Subscription to monitor internet status changes.
   late StreamSubscription<InternetStatus> _subscription;
 
-  /// Initial subscription for connection status updates.
+  /// Initializes the internet status subscription.
   void _initializeSubsciption() {
     _subscription = InternetConnection.createInstance().onStatusChange.listen(_updateConnectionStatus);
   }
@@ -28,21 +34,25 @@ class _ConnectionCheckerModuleState extends State<ConnectionCheckerModule> {
 
   /// Updates the connection status.
   /// @param status The new [InternetStatus].
-  void _updateConnectionStatus(InternetStatus status) {
-    isConnected.value = status;
-  }
+  void _updateConnectionStatus(InternetStatus status) => isConnected.value = status;
 
   @override
   void initState() {
     _initializeSubsciption();
-    _listener = AppLifecycleListener(onResume: _initializeSubsciption, onPause: _subscription.cancel);
+    _initializeLifeCycleListener();
     super.initState();
   }
 
   @override
   void dispose() {
+    /// Cancels the subscription and disposes the lifecycle listener.
     _subscription.cancel();
     _listener.dispose();
+
+    /// Disposes the ValueNotifier.
+    isConnected.dispose();
+
+    /// Calls the superclass dispose method.
     super.dispose();
   }
 
