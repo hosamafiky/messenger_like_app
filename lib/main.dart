@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:messenger_like_app/src/core/modules/connection_checker_module.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -53,6 +54,7 @@ class MyApp extends StatelessWidget {
           themeMode: ThemeMode.system,
           home: const AuthWrapper(),
           debugShowCheckedModeBanner: false,
+          builder: (context, child) => ConnectionCheckerModule(child: child),
         );
       },
     );
