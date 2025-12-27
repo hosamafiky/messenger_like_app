@@ -17,16 +17,16 @@ class _ConnectionCheckerModuleState extends State<ConnectionCheckerModule> {
   late final AppLifecycleListener _listener;
 
   /// Initializes the lifecycle listener.
-  void _initializeLifeCycleListener() {
-    _listener = AppLifecycleListener(onResume: _initializeSubsciption, onPause: _subscription.cancel);
+  AppLifecycleListener _initializeLifeCycleListener() {
+    return AppLifecycleListener(onResume: _initializeSubsciption, onPause: _subscription.cancel);
   }
 
   /// Subscription to monitor internet status changes.
   late StreamSubscription<InternetStatus> _subscription;
 
   /// Initializes the internet status subscription.
-  void _initializeSubsciption() {
-    _subscription = InternetConnection.createInstance().onStatusChange.listen(_updateConnectionStatus);
+  StreamSubscription<InternetStatus> _initializeSubsciption() {
+    return InternetConnection.createInstance().onStatusChange.listen(_updateConnectionStatus);
   }
 
   /// A [ValueNotifier] that holds the current internet connectivity status.
@@ -38,8 +38,8 @@ class _ConnectionCheckerModuleState extends State<ConnectionCheckerModule> {
 
   @override
   void initState() {
-    _initializeSubsciption();
-    _initializeLifeCycleListener();
+    _subscription = _initializeSubsciption();
+    _listener = _initializeLifeCycleListener();
     super.initState();
   }
 
