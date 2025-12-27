@@ -13,7 +13,15 @@ class ConnectionCheckerModule extends StatefulWidget {
 }
 
 class _ConnectionCheckerModuleState extends State<ConnectionCheckerModule> {
-  StreamSubscription? _connectionSubscription;
+  late final AppLifecycleListener _listener;
+
+  /// Subscription to monitor internet status changes.
+  late StreamSubscription<InternetStatus> _subscription;
+
+  /// Initial subscription for connection status updates.
+  void _initializeSubsciption() {
+    _subscription = InternetConnection.createInstance().onStatusChange.listen(_updateConnectionStatus);
+  }
 
   /// A [ValueNotifier] that holds the current internet connectivity status.
   ValueNotifier<InternetStatus> isConnected = ValueNotifier<InternetStatus>(InternetStatus.disconnected);
@@ -26,13 +34,15 @@ class _ConnectionCheckerModuleState extends State<ConnectionCheckerModule> {
 
   @override
   void initState() {
-    _connectionSubscription = InternetConnection.createInstance().onStatusChange.listen(_updateConnectionStatus);
+    _initializeSubsciption();
+    _listener = AppLifecycleListener(onResume: _initializeSubsciption, onPause: _subscription.cancel);
     super.initState();
   }
 
   @override
   void dispose() {
-    _connectionSubscription?.cancel();
+    _subscription.cancel();
+    _listener.dispose();
     super.dispose();
   }
 
